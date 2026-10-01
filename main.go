@@ -55,7 +55,24 @@ func main(){
 			"user" : user,
 			"message" : "User successfully created in database",
 		})
+	})
 
+	router.HandleFunc("GET /users/{id}" ,func(w http.ResponseWriter, r *http.Request) {
+		user ,err := repositories.NewUserRepository(db).GetUser(r)
+		if err != nil {
+			w.Header().Set("Content-Type","application/json")
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]any{
+				"message" : "User Not Found",
+				"details": err.Error(),
+			})
+			return
+		}
+		w.Header().Set("Content-Type","application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]any{
+			"user" : user,
+		})
 	})
 	
 	fmt.Println("Listenning on 8080")
