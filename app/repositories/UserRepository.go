@@ -83,3 +83,18 @@ func (ur *UserRepository) GetUsers() ([]User, error) {
 	return users, nil
 }
 
+func (ur *UserRepository) GetUser(req *http.Request) (User ,error) {
+	var user User
+	var id string
+	id = req.PathValue("id")
+	stmt ,err := ur.db.Prepare("SELECT * FROM users WHERE id = ?")
+	if err != nil {
+		return User{} ,err
+	}
+	defer stmt.Close()
+	err = stmt.QueryRow(id).Scan(&user.Id ,&user.Username ,&user.Email ,&user.Date)
+	if err != nil {
+		return User{} ,err
+	}
+	return user ,nil
+}
