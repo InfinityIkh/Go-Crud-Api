@@ -92,6 +92,27 @@ func main() {
 		})
 	})
 
+	router.HandleFunc("PUT /users/{id}", func(w http.ResponseWriter, r *http.Request) {
+		user, err := repositories.NewUserRepository(db).UpdateUser(r)
+
+		w.Header().Set("Content-Type", "application/json")
+
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]any{
+				"message": "User Not Found",
+				"details": err.Error(),
+			})
+			return // Stop execution here
+		}
+
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]any{
+			"user":    user,
+			"message": "User successfully updated in database",
+		})
+	})
+
 	fmt.Println("Listenning on 8080")
 	http.ListenAndServe(":8080", router)
 }
