@@ -114,3 +114,28 @@ func (ur *UserRepository) DeleteUser(req *http.Request) (User, error) {
 	}
 	return user, nil
 }
+
+func (ur *UserRepository) UpdateUser(req *http.Request) (User, error) {
+	var user User
+	var id string
+	id = req.PathValue("id")
+	var body Body
+	err := json.NewDecoder(req.Body).Decode(&body)
+	if err != nil {
+		return User{}, err
+	}
+	err = validation.Validate(body.Username, body.Email)
+	if err != nil {
+		return User{}, err
+	}
+	_, err = ur.db.Exec("UPDATE users SET username = ?, email = ? WHERE id = ?",
+		body.Username, body.Email, id)
+	if err != nil {
+		return User{}, err
+	}
+	user, err = ur.GetUser(req)
+	if err != nil {
+		return User{}, err
+	}
+	return user, nil
+}
